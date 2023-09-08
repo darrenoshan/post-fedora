@@ -1,0 +1,19 @@
+#!/usr/bin/bash
+#------------------------
+
+date +%Y_%m_%d_%H_%M_%S
+runstatu="ss"
+
+set_screen(){
+    tput smcup
+    while [ ! "$runstatus" = "finished" ] ; do
+        clear
+        echo $runstatus .
+        sleep 0.3
+        echo $runstatus . .
+        sleep 0.3
+        echo $runstatus . . .
+        sleep 0.3
+    done
+tput rmcup
+}

@@ -1,0 +1,61 @@
+VARIABLES
+SSHnewport=22
+
+    func_backup(){
+        code --list-extensions >> vs_code_extensions_list.txt
+        cat vs_code_extensions_list.txt | xargs -n 1 code --install-extension
+    }
+
+    fund_ssh_access_fix(){
+        firewall-cmd --add-port=$SSHnewport/tcp --permanent && firewall-cmd --reload
+        systemctl enable --now firewalld
+        sed -i /etc/ssh/sshd_config -e 's/^\#*Port.*/'Port\ $SSHnewport'/'
+        semanage port -a -t ssh_port_t -p tcp $SSHnewport
+        semanage port -l | grep ssh
+        systemctl restart sshd firewalld
+
+        echo "checking if the ssh port is allowed in firewall and selinux allowed it."
+        RUNPORT=`netstat -lntp | grep -i sshd | tr -s " " | cut -d " " -f 4 | cut -d ":" -f 2 | grep -v "^$"`
+        RUNPORTSE=`semanage port -l | grep ssh | grep $SSHnewport -c`
+
+        if [ "$RUNPORT" -eq "$SSHnewport" ] && [ "$RUNPORTSE" -eq "1" ] ;then
+            return 0
+            else
+            printError '!!!!! ----- PROBLEM SETTING ENABLEING SSHD WITH NEW PORT - SELINUX - FIREWALLD ----- !!!!!'
+            return 1
+        fi
+    }
+
+    func_fedora_upgrade(){
+        if [[ ! -f "/var/log/upgrade.`date +%Y_%m_%d`" ]] ; then
+            touch "/var/log/upgrade.`date +%Y_%m_%d`"
+            dnf install -y dnf-plugin-system-upgrade && dnf upgrade -y --refresh  && reboot 
+        fi
+        dnf update --best --allowerasing -y --refresh
+        dnf system-upgrade download --releasever=$1 --allowerasing --best -y && dnf system-upgrade reboot -y
+        dnf install rpmconf remove-retired-packages -y  && rpmconf -a && remove-retired-packages
+        dnf repoquery --unsatisfied && dnf repoquery --duplicates
+        rpm --rebuilddb
+        dnf -y distro-sync --allowerasing
+        fixfiles -B onboot
+        rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$1-primary
+        dnf update --best --allowerasing -y --refresh
+        fwupdmgr refresh --force
+        fwupdmgr get-updates
+        fwupdmgr update
+        
+        func_upgrade(){
+        # dnf install https://fedora.mirror.liquidtelecom.com/fedora/linux/releases/38/Everything/x86_64/os/Packages/f/fedora-gpg-keys-38-1.noarch.rpm -y
+        # dnf groupupdate core -y && dnf update --best --allowerasing -y --refresh && dnf upgrade --refresh -y && dnf install dnf-plugin-system-upgrade -y && dnf system-upgrade download --releasever=38 -y && dnf system-upgrade reboot -y
+        # #optional
+        # dnf install rpmconf symlinks -y && dnf autoremove -y 
+        # rpmconf -a
+        # rpm --rebuilddb && dnf distro-sync && fixfiles -B onboot && symlinks -r -d /usr
+        echo upgrade using these commands
+        }
+    }
+
+
+    new_bash_file='#!/usr/bin/bash \n\n\n\n\n'
+    new_python_file='#!/usr/bin/python \n\n\n\n\n'
+    new_text_file=' # New Text '

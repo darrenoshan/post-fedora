@@ -1,0 +1,30 @@
+#!/usr/bin/bash
+#------------------------
+
+#------------------------PACKAGES
+CMD[0]="chrony cronie fdupes jdupes jcal pwgen setroubleshoot-server pip wget mmv mlocate unar unrar p7zip p7zip-plugins yamllint lshw htop sysstat inxi iotop util-linux firewalld policycoreutils-python-utils python3-pip ntpsec "
+CMD[1]="dialog figlet bash-completion tmux vim screen mc xml2 "
+CMD[2]="moby-engine sen podman podman-compose podman-tui "
+CMD[3]="cmake git python-devel jq ansible clang gcc golang kernel-devel kernel-headers make dkms acpid "
+CMD[4]="sshuttle nethogs telnet traceroute iputils bind-utils mtr bwm-ng nc NetworkManager-tui nmap vnstat hping3 ftp  ngrep iptraf iftop net-tools dnstop dnsperf GeoIP ntpcheck sshfs whois wireguard-tools "
+CMD[5]="lolcat toilet qrencode tcpdump info "
+CMD[6]="macchanger axel aria2 iperf lftp whatmask lynx netstat-nat vim-enhanced neovim neovim-qt vim-ansible vim-commentary vim-enhanced vim-go vim-golint
+vim-jedi vim-latex vim-latex-doc vim-syntastic vim-syntastic-cpp vim-syntastic-c vim-syntastic-go vim-syntastic-html vim-syntastic-php vim-syntastic-perl vim-syntastic-python vim-syntastic-xml vim-syntastic-xhtml "
+
+GUI[0]="NetworkManager-adsl NetworkManager-bluetooth NetworkManager-cloud-setup NetworkManager-config-connectivity-fedora NetworkManager-config-server NetworkManager-dispatcher-routing-rules NetworkManager-fortisslvpn NetworkManager-fortisslvpn-gnome NetworkManager-iodine NetworkManager-iodine-gnome NetworkManager-l2tp NetworkManager-l2tp-gnome NetworkManager-libnm NetworkManager-libnm-devel NetworkManager-libreswan NetworkManager-libreswan-gnome NetworkManager-openconnect NetworkManager-openconnect-gnome NetworkManager-openvpn NetworkManager-openvpn-gnome NetworkManager-ovs NetworkManager-ppp NetworkManager-pptp NetworkManager-pptp-gnome NetworkManager-ssh NetworkManager-ssh-gnome NetworkManager-sstp NetworkManager-sstp-gnome NetworkManager-strongswan NetworkManager-strongswan-gnome NetworkManager-team NetworkManager-vpnc NetworkManager-vpnc-gnome NetworkManager-wifi NetworkManager-wwan network-manager-applet nm-connection-editor strongswan-charon-nm openvpn "
+GUI[1]="mplayer ffmpeg audacious sound-juicer audacious-plugins-freeworld* gstreamer1-libav gstreamer1-plugin-openh264 HandBrake-gui kdenlive pavucontrol shotcut soundconverter vlc vlc-extras drawing gimp clapper youtube-dl celluloid "
+GUI[2]="winehq-stable gnome-shell-extension-appindicator gnome-shell-extension-apps-menu gnome-shell-extension-dash-to-dock gnome-shell-extension-just-perfection "
+GUI[3]="numix-icon-theme-circle numix-icon-theme-square numix-icon-theme moka-icon-theme suru-icon-theme candy-icon-theme elementary-icon-theme engrampa"
+GUI[4]="fedora-workstation-repositories xfce4-taskmanager xfce4-terminal gnome-tweak-tool google-chrome-stable gparted grub-customizer isomaster leafpad mate-terminal wireshark xreader xed krfb nautilus-open-terminal nomacs polari putty qbittorrent remmina remmina-plugins-* telegram-desktop tor torbrowser-launcher virt-manager VirtualBox tigervnc variety pdfmod xournal xscreensaver xscreensaver-extras gnome-extensions-app goldendict caja caja-core-extensions caja-image-converter caja-open-terminal caja-schemas caja-share caja-wallpaper lxc lxc-templates discord libvirt-client code dconf-editor dconf meld skypeforlinux "
+GUI[5]="libglvnd-glx libglvnd-opengl libglvnd-devel pkgconfig akmod-nvidia "
+GUI[6]="pycharm-community pycharm-community-plugins pycharm-community-doc overpass-mono-fonts overpass-fonts"
+GUI[7]="Zim calligra poedit geeqie "
+
+SRV[0]="bind bind-chroot "
+
+# PKG1='texstudio texlive-scheme-full'
+# PKG1 is for full huge installation, it should be added manually if needed
+
+# ${CMD[@]}
+# ${GUI[@]}
+

@@ -1,0 +1,70 @@
+#!/usr/bin/bash
+#------------------------
+
+#------------------------Config FILES
+    dnf_config="[main]
+    gpgcheck=1
+    installonly_limit=3
+    clean_requirements_on_remove=True
+    best=False
+    skip_if_unavailable=True
+    ip_resolve=4
+    fastestmirror=true
+    max_parallel_downloads=20
+    deltarpm=1
+    keepcache=True
+    "
+
+    bashConfig='
+    #-bash_RC_config==============#
+    export SYSTEMD_PAGER=
+    export HISTCONTROL=ignoreboth
+    export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S "
+    export VISUAL=/usr/bin/vi
+    export EDITOR="$VISUAL"
+    shopt -s histappend
+    PS1="\[\e[0;1m\]\u\[\e[0m\]@\[\e[0;1;38;5;160m\]\H\[\e[0m\][\[\e[0;1m\]\W\[\e[0m\]]\[\e[0m\]:\[\e[0m\](\[\e[0;1m\]$?\[\e[0m\])\[\e[0m\]\$ \[\e[0m\]"
+    alias wget="wget --report-speed=bits "
+    alias mydnf="dnf update --best --allowerasing -y --refresh "
+    alias mylogs1="journalctl --since \"10 min ago\""
+    alias mylogs2="journalctl --since \"1 hour ago\""
+    alias dig="dig +short "
+    alias ll="ls -l --color=no"
+    alias lll="ls -ltrh --color=no"
+    alias llll="ls -ltrha --color=no"
+    alias lsblk="lsblk -o NAME,MOUNTPOINT,FSTYPE,SIZE,TYPE,UUID "
+    alias date.dir="date +%Y_%m_%d_%H_%M_%S "
+    alias jdate.dir="jdate +%Y_%m_%d_%H_%M_%S "
+    alias grep="grep --color=never "
+    alias pwgen="pwgen -sBnv1 40"
+    alias tcpdump.file="tcpdump -nnnnvvvvvvv -s 65535 -w dump`date +%Y_%m_%d_%H_%M_%S`.pacp"
+    alias s="sudo su"
+    alias myping="ping -i 0.2 -W 0.2 -w 10 -v -O -U -c 100 "
+
+    #-bash_RC_config==============END#
+    '
+    ssh_client_config='
+    # -----TEMPLATE----
+    Host host1 !host2
+        ProxyJump host1
+        LocalCommand echo -e "\n\n\x1b[30;31m------WARNING: You are on a PRODUCTIVE system! \x1b0------\n\n"
+        PermitLocalCommand yes
+        User root
+        LocalForward 3306 127.0.0.1:33061
+        StrictHostKeyChecking no
+        IdentityFile /home/darren/.ssh/TEMPLATEKEY
+        HostKeyAlgorithms +ssh-rsa,ssh-dss
+        PubkeyAcceptedKeyTypes +ssh-rsa,ssh-dss
+        KexAlgorithms +curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1
+        Ciphers +aes256-cbc,aes128-cbc,3des-cbc
+        HostbasedKeyTypes +ssh-rsa,ssh-dss'
+
+    skype_repo_config='
+    [skype-stable]
+    name=skype (stable)
+    baseurl=https://repo.skype.com/rpm/stable/
+    enabled=1
+    gpgcheck=1
+    gpgkey=https://repo.skype.com/data/SKYPE-GPG-KEY
+    '
+

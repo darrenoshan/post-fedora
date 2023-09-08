@@ -1,0 +1,178 @@
+#!/usr/bin/bash
+#------------------------
+
+#------------------------FUNCTIONS
+    func_before_run(){
+        runstatus="Running Function: 'func_before_run' "
+        if ! [ -f /usr/sbin/firewalld ] ; then 
+            if ! [ -f /usr/sbin/semanage ] ; then 
+                dnf install -y firewalld policycoreutils-python-utils
+            else 
+                dnf install -y firewalld
+            fi
+        fi
+        if ! [ `rpm -qa deltarpm | wc -l` -eq "1" ] ; then
+            dnf install deltarpm -y
+        fi
+        # rpm -qa | grep -iwc screen
+    }
+    func_bashrc(){
+        runstatus="Running Function: 'func_bashrc' "
+        for file in /home/*/.bashrc /root/.bashrc ; do
+            check_file=`grep -wic bash_RC_config $file 2> /dev/null`
+            if [ $? -ne 0 ] ; then continue ;fi
+            if [ "$check_file" -lt "2" ] ; then
+                echo "$bashConfig" | sed 's/^[ \t]*//' >> $file
+            fi
+        done
+    }
+    func_disable_se(){
+        runstatus="Running Function: 'func_disable_se' "
+        sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+        setenforce 0
+    }
+    func_mkswap(){
+        runstatus="Running Function: 'func_mkswap' "
+        if ! test `swapon | grep -ic "/opt/swapfile"` -le "1" ; then 
+            fallocate -l 8GB /opt/swapfile
+            chown root:root /opt/swapfile
+            chmod 600 /opt/swapfile
+            mkswap /opt/swapfile
+            swapon /opt/swapfile
+            restorecon /opt/swapfile    
+            sed -i /etc/fstab -e 's/.*swap.*//'
+            echo '/opt/swapfile  none    swap    defaults    0 0' >> /etc/fstab
+        fi
+    }
+    func_dnf_conf(){
+        runstatus="Running Function: 'func_dnf_conf' "
+        cp /etc/dnf/dnf.conf /etc/dnf/dnf.conf.backup`date +_%y_%m_%d_%H_%M_%S `
+        echo -e "$dnf_config " | tr -d " " > /etc/dnf/dnf.conf
+    }
+    func_ssh_client_config(){
+        runstatus="Running Function: 'func_ssh_client_config' "
+        for dir in /home/* /root/ ; do
+            mkdir -p "$dir/.ssh"
+            echo "$ssh_client_config"  > "$dir"/.ssh/config
+        done
+    }
+    func_repo_rpmfusion(){
+        runstatus="Running Function: 'func_repo_rpmfusion' "
+        if [ `ls -lash /etc/yum.repos.d/rpmfusion* 2> /dev/null | wc -l` -lt "8" ] ; then
+        curl -o /tmp/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+         -s "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+        
+        curl -o /tmp/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
+         -s "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+        rpm -Uvh /tmp/rpmfusion*.rpm
+        fi
+    }
+    func_repo_gui(){
+        runstatus="Running Function: 'func_repo_gui' "
+        if [ "$IS_GUI" -eq 1 ] ; then
+            rm -rf /var/cache/dnf
+            if [ `ls -lash /etc/yum.repos.d/wine* 2> /dev/null | wc -l` -lt "1" ] ; then
+                dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/$(rpm -E %fedora)/winehq.repo
+            fi
+            if [ `ls -lash /etc/yum.repos.d/vscode.repo 2> /dev/null | wc -l` -lt "1" ] ; then
+                sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+                rpm --import https://packages.microsoft.com/keys/microsoft.asc
+            fi
+            if [ `ls -lash '/etc/yum.repos.d/skype-stable.repo' 2> /dev/null | wc -l` -lt "1" ] ; then
+                echo -e "$skype_repo_config " | tr -d " " > /etc/yum.repos.d/skype-stable.repo
+            fi
+            if [ `rpm -qa fedora-workstation-repositories dnf-plugins-core deltarpm | wc -l ` -lt "3" ] ; then
+                dnf install -y deltarpm dnf-plugins-core fedora-workstation-repositories 
+            fi
+            dnf config-manager --set-enabled google-chrome
+        fi
+    }
+    func_gui_multimedia_fix(){
+        runstatus="Running Function: 'func_gui_multimedia_fix' "
+        if [ "$IS_GUI" -eq 1 ] ; then
+            dnf groupupdate -y sound-and-video
+            dnf install -y vlc gstreamer1-plugins-{bad-\*,good-\*,ugly-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel ffmpeg gstreamer-ffmpeg 
+            dnf install -y lame\* --exclude=lame-devel
+            dnf group upgrade --with-optional Multimedia -y
+        fi
+    }
+    func_gui_3rdp_apps(){
+        runstatus="Running Function: 'func_gui_3rdp_apps' "
+        # install wine , mikrotik winbox , gns3gui , DBeaver
+        if [ "$IS_GUI" -eq 1 ] ; then
+            # installing wine
+            wget  https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -O /usr/local/bin/winetricks
+            chmod +x /usr/local/bin/winetricks
+
+            # installing Mikrotik Winbox
+            wget -q https://mt.lv/winbox64 -O /usr/bin/winbox.exe &
+            cd && rm -rf /tmp/winbox_on_linux && git clone https://github.com/darrenoshan/winbox_on_linux /tmp/winbox_on_linux
+            cd /tmp/winbox_on_linux/ && bash /tmp/winbox_on_linux/install && cd && rm -rf /tmp/winbox_on_linux
+
+            # installing GNS3
+            pip install gns3-gui 2> /dev/null || pip3 install gns3-gui 2> /dev/null
+            #pip install 'gns3-gui==2.2.23'
+
+            # installing DBeaver
+            wget "https://dbeaver.io/files/dbeaver-ce-latest-stable.x86_64.rpm" -O /tmp/dbeaver-ce-latest-stable.x86_64.rpm
+            dnf install -y /tmp/dbeaver-ce-latest-stable.x86_64.rpm
+        fi
+    }
+    func_dockers(){
+        runstatus="Running Function: 'func_gui_3rdp_apps' "
+        # installing docker-compose
+        curl -s https://api.github.com/repos/docker/compose/releases/latest \
+        | grep browser_download_url \
+        | grep docker-compose-linux-x86_64 \
+        | cut -d '"' -f 4 \
+        | wget -O  /tmp/docker-compose-linux-x86_64 -qi - 
+
+        mv /tmp/docker-compose-linux-x86_64 /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+    }
+    func_pkg_cmd(){
+        runstatus="Running Function: 'func_pkg_cmd' "
+        dnf makecache
+        dnf --allowerasing --best -y install  ${CMD[@]}
+    }
+    func_pkg_cmd_force(){
+        runstatus="Running Function: 'func_pkg_cmd_force' "
+        dnf makecache 
+        for pkg in  ${CMD[@]} ; do
+            dnf install -y $pkg
+        done
+    }
+    func_pkg_gui(){
+        runstatus="Running Function: 'func_pkg_gui' "
+        if [ "$IS_GUI" -eq 1 ] ; then
+            dnf makecache 
+            dnf --allowerasing --best -y install  ${CMD[@]} ${GUI[@]}
+        fi
+    }
+    func_pkg_gui_force(){
+        runstatus="Running Function: 'func_pkg_gui_force' "
+        if [ "$IS_GUI" -eq 1 ] ; then
+            dnf makecache 
+            for pkg in   ${CMD[@]} ${GUI[@]} ; do
+                dnf install -y $pkg
+            done
+        fi
+    }
+    func_update(){
+        dnf update --best --allowerasing -y --refresh
+    }
+    func_hw_update(){
+        fwupdmgr refresh --force
+        fwupdmgr get-updates
+        fwupdmgr update
+    }
+    func_upgrade(){
+        # dnf install https://fedora.mirror.liquidtelecom.com/fedora/linux/releases/38/Everything/x86_64/os/Packages/f/fedora-gpg-keys-38-1.noarch.rpm -y
+        # dnf groupupdate core -y && dnf update --best --allowerasing -y --refresh && dnf upgrade --refresh -y && dnf install dnf-plugin-system-upgrade -y && dnf system-upgrade download --releasever=38 -y && dnf system-upgrade reboot -y
+        # #optional
+        # dnf install rpmconf symlinks -y && dnf autoremove -y 
+        # rpmconf -a
+        # rpm --rebuilddb && dnf distro-sync && fixfiles -B onboot && symlinks -r -d /usr
+        echo upgrade using these commands
+    }
+    
