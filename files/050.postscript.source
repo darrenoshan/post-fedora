@@ -91,7 +91,7 @@ func_gui_post_gnome(){
         gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0
         gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
 
-        gsettings set profile="org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/"
+        profile="org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9/"
         gsettings set "$profile" "background-color" 'rgb(0,0,0)'
         gsettings set "$profile" "default-size-columns" 200
         gsettings set "$profile" "default-size-rows" 200
